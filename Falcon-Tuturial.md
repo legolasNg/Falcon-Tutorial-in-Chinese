@@ -1,7 +1,7 @@
 ﻿# Falcon教程
 [Falcon Tutorial(英文链接)][1]
 
-标签（空格分隔）： REST Falcon Python
+tags:`REST` `Falcon` `Python`
 
 ---
 
