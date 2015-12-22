@@ -29,6 +29,6 @@ Falcon 是一个高性能的 Python 框架，用于构建云端 API 和 Web 应�
 - 支持Python 2.6,Python 2.7,PyPy和Python 3.3/3.4
 - 高性能
 
-###官方github主页:<https://github.com/falconry/falcon>
+官方github主页:<https://github.com/falconry/falcon>
 
-###官方网站:<http://falconframework.org/index.html>
+官方网站:<http://falconframework.org/index.html>
