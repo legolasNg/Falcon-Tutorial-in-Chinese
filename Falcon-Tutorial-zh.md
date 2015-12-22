@@ -125,7 +125,8 @@ class Resource(object):
 ```
 
 注意，使用`resp.data`代替`resp.body`。如果你给后者`resp.body`指定一个bytestring，Falcon也能处理，但是通过直接指定`resp.data`你将获得一些性能提升。
-现在让我们看resource运行得如何。回到`app.py`，并且将其修改成下面的形式:
+
+现在关联上resource，看其运行得如何。回到`app.py`，并且将其修改成下面的形式:
 
 ```python
 import falcon
@@ -309,6 +310,212 @@ class Item(object):
 
 **Tips**
 
-  
+如果你事先不知道数据流的大小，你可以通过使用分块编码，这个用法超过该教程范围。
+
+如果`resp.status`没有明确地设定，其默认值为`200 OK`，确切的说，这应该是我们应该在`on_get`响应器去做的。
+
+现在我们将事件关联上，然后尝试运行一下。首先按照下面的例子来编辑`app.py`:
+
+```python
+import falcon
+
+import images
+
+
+api = application = falcon.API()
+
+storage_path = '/usr/local/var/look'
+
+image_collection = images.Collection(storage_path)
+image = image.Item(storage_path)
+
+api.add_route('/images', image_collection)
+api.add_route('/images/(name)', image)
+```
+
+可见，我们定义了一个新的路由`/images/{name}`。这会让Falcon将所有的对应的响应器(responder)和获取的`name`参数关联起来。
+
+**Tips**
+
+Falcon还支持更加复杂的参数化路径段(包含多个值)。例如，类Grasshopper(GH-like,可以通过参数的调整直接改变模型形态)的API能够使用下面的模板为两个分支添加一个路由。
+
+```
+/repo/{org}/{repo}/compare/{usr0}:{branch0}...{usr1}:{branch1}
+```
+
+然后，我们重启gunicorn，并且post并一张图片给service:
+
+```
+$  http POST localhost:8000/images Content-type:image/jpeg < test.jpg
+```
+
+记下在Location header中返回的路径，然后使用该路径去GET这张图片:
+
+```
+$ http localhost:8000/images/6daa465b7b.jpeg
+```
+
+HTTPie默认不会下载图片，但是我们可以看到响应(response)的header被设置好了。更有趣的是，我们可以继续在浏览器中输入刚才的URL，图片会被正确的显示出来。
+
+##7. “钩子”简介(Introducing Hooks)
+
+看到这里，我们应该对Falcon基础API有了较好的理解。在教程结束前，我们需要花费一点时间去整理代码，并且加上一些错误处理。
+
+第一步，当接收到一个POST请求时，检查输入的媒体类型(incoming media type)去确认是否为通用图像类型。我们可以通过使用Falcon的`before`钩子来完成。
+ @wjy 2015-12-22 18:26 字数 8599 阅读 22 
+首先，我们需要定义一个service接收的媒体类型列表。将这些常量定义放在代码顶部，也就是`images.py`文件的import声明后面。
+
+```python
+ALLOWED_IMAGE_TYPES = (
+    'image/gif',
+    'image/jpeg',
+    'image/png',
+)
+```
+
+这样声明只接收GIF、JPEG、PNG图像格式，当然你也可以添加你想要的其它格式。
+
+接下来，在每个请求post消息前创建一个钩子。并且在`ALLOWED_IMAGE_TYPES`下面添加该方法:
+
+```python
+def validate_image_type(req, resp, params):
+    if req.content_type not in ALLOWED_IMAGE_TYPES:
+        msg = 'Image type not allowed. Must be PNG, JPEG, or GIF'
+        raise falcon.HTTPBadRequest('Bad request', msg)
+```
+
+然后将这个钩子附加在`on_post`响应器上，如下:
+
+```python
+@falcon.before(validate_image_type)
+def on_post(self, req, resp):
+```
+
+这样，每当这个`on_post`响应器被调用前，Falcon将先执行(invoke)`validate_image_type`这个方法。除了必须接受三个参数外，该方法并没有什么特别的。对于每个钩子，会引用传递进对应响应器(responder)的`req`和`reqsp`对象，作为前2个参数。第三个参数，习惯上被称作`params`，引用自Falcon为每个request创建的kwarg字典。如果`params`存在的话，将包含路由的URL模板参数及其对应的值。
+
+由此可见，我们可以使用`req`去获得关于传入的请求的相关信息。而且需要的话，我们也可以使用`resp`去操作HTTP响应，为了避免重复代码(in a DRY way)我们甚至可以给响应器(responder)添加额外的kwarg，例如:
+```python
+def extract_project_id(req, resp, params):
+    """
+    为所有响应器的params添加'project_id'。
+    意味着将在'before'钩子中被使用
+    """
+    params['project_id'] = req.get_header('X-PROJECT-ID')
+```
+
+现在我们可以想象，这样的一个钩子应该适用于一个资源(resource)的所有响应器(responder)，甚至可以适用于全局范围内的所有资源。我们还可以将钩子应用到整个资源上，如下:
+
+```python
+@falcon.before(extract_project_id)
+class Message(object):
+
+    #...
+```
+
+而且，在API类初始化时将钩子作为参数传递进去，我们可以全局应用:
+
+```python
+falcon.API(before=[extract_project_id])
+```
+
+如果想对钩子(hooks)进一步了解，可以查阅`API`类的帮助文档，也有装饰器`falcon.before`和`falcon.after`的帮助文档。
+
+至此，我们已经添加了一个钩子--在图像被POST时确认媒体类型。你可以实际操作一下，比如传入一些邪恶的东西，看看发生什么:
+
+```
+$ http POST localhost:8000/images Content-Type:image/jpx < test.jpx
+```
+
+不出意外，会返回`400 Bad Request`状态和结构分明的错误body。当出现错误时，我们通常想给用户一些信息，来帮助他们解决问题。这个规则有个例外，用户请求访问未授权的东西时产生的错误。这种情况，我们应该希望去仅仅返回一个`404 Not Found`的空body，防止恶意用户想要获得一些能帮助他们破解我们API的信息。
+
+**Tip**
+
+可以关注一下我们的姊妹项目--[Talcons][3]，由社区贡献的一些游泳的Falcon钩子。如果你创建了一些有趣的钩子，同时你认为别人也需要，可以考虑贡献到该项目。
+
+##8. 错误处理(Error Handling)
+
+通常来讲，Falcon假定资源的响应器(on_get,on_post等)在大部分情况下能正确运作。也就是说，Falcon在保护响应器代码上没有做太多工作。
+
+(通常)这样可以减少多余的检查，Falcon可以专注运行一些核心代码，使得框架更高效。在这种理念下，利用Falcon构建一个高质量的API需要:
+
+1.资源响应器将响应变量设置为完整值
+2.大部分代码易于测试
+3.错误应该是可预见、易查明，并且能在每个响应器中做作相应处理。
+
+**Tip**
+
+除非已经注册自定义处理这种情况的程序,不要继承`falcon.HTTPError`，否则Falcon将会重新抛出错误。(详情请见：[falcon.API][4])
+
+谈到错误处理，当发生一些可怕的(轻度的)错误，我们可以手动设置错误状态、合适的响应header、甚至是一个使用`resp`对象的错误body。然而，Falcon通过提供一套在错误发生时可能抛出的异常，使得处理更加容易。事实上，如果Falcon捕获到(catch)继承自`falcon.HTTPError`的响应器(responder)抛出的任何异常，框架会将异常转换成对应的HTTP错误响应。
+
+你可以抛出`falcon.HTTPError`的实例，或者使用一些预定义的错误类--尝试做一些正确的事情去设置header和body。查阅下面的文档，你可以获得横多关于在你的API中如何使用的信息：
+
+```python
+falcon.HTTPBadGateway
+falcon.HTTPBadRequest
+falcon.HTTPConflict
+falcon.HTTPError
+falcon.HTTPForbidden
+falcon.HTTPInternalServerError
+falcon.HTTPLengthRequired
+falcon.HTTPMethodNotAllowed
+falcon.HTTPNotAcceptable
+falcon.HTTPNotFound
+falcon.HTTPPreconditionFailed
+falcon.HTTPRangeNotSatisfiable
+falcon.HTTPServiceUnavailable
+falcon.HTTPUnauthorized
+falcon.HTTPUnsupportedMediaType
+falcon.HTTPUpgradeRequired
+```
+
+例如，你可以这样处理没找到的图片:
+
+```python
+try:
+    resp.stream = open(image_path, 'rb')
+except IOError:
+    raise falcon.HTTPNotFound()
+```
+
+或者你也可以这样处理一个假冒的文件名:
+
+```python
+VALID_IMAGE_NAME = re.compile(r'[a-f0-9]{10}\.(jpeg|gif|png)$')
+
+#...
+
+class Item(object):
+
+    def __init__(self, storage_path):
+        self.storage_path = storage_path
+        
+    def on_get(self, req, resp, name):
+        if not VALID_IMAGE_NAME.match(name):
+            raise falcon.HTTPNotFound()
+```
+
+有时候你可能对获取抛出异常的类型没有太多把握。为了解决这个问题，Falcon允许创建解决任何错误类型的自定义处理程序。例如，如果数据库抛出继承自清楚的数据库错误(NiftyDBError)异常，我们可以设置一个特殊的错误处理程序去处理对应的数据库错误(NiftyDBError),但是你不必跨多个响应器(respondee)去粘贴复制你的错误处理代码。
+
+查阅关于`falcon.API.add_error_handler`的文档，获取更多这些特性的信息，使你的代码尽可能精简漂亮：
+
+```
+In [7]: help(falcon.API.add_error_handler)
+```
+
+
+##9. 现在该怎么做？
+
+我们友好的社区可以回答你的问题，帮助你解决棘手的问题。
+
+参照:[获取帮助][5]
+
+之前有提到，Falcon的文档覆盖面是相当广的。所以通过Python交互式解释器(REPL,例如IPython、bpython)查阅Falcon的模块，你可以学到很多。
+
+同时，千万不要吝啬将在Github上的Falcon源代码pull下来，然后在你心爱的编辑器中浏览。开发团队已经尽可能将代码写的简洁明了、高可读性;文档可能会有些问题，但是代码基本上不会出错的。
+
   [1]: http://falcon.readthedocs.org/en/stable/user/tutorial.html
   [2]: http://msgpack.org/
+  [3]: https://github.com/talons/talons
+  [4]: http://falcon.readthedocs.org/en/stable/api/api.html#api
+  [5]: http://falcon.readthedocs.org/en/stable/community/help.html#help
