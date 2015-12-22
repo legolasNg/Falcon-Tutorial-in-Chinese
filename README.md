@@ -1,14 +1,15 @@
-#Falcon-Tutorial-in-Chinese
-
 ---
+##Falcon-Tutorial-in-Chinese
 
-中文版Falcon官方教程《Falcon Tutorial》
+中文版Falcon官方教程《Falcon Tutorial》([英文原版][1])。
 
-[英文原版][1]
+后续会将官方文档《Classes and Functions》([英文原版][2])也进行翻译。
 
 这是个人业余时间的一个尝试，如果有什么问题，欢迎指正。
 
 <wujianye3@163.com>
+
+---
 
 ##Falcon简介
 
@@ -36,3 +37,4 @@ Falcon 是一个高性能的 Python 框架，用于构建云端 API 和 Web 应�
 Falcon官网:<http://falconframework.org/index.html>
 
 [1]:http://falcon.readthedocs.org/en/stable/user/tutorial.html
+[2]:http://falcon.readthedocs.org/en/stable/api/index.html
