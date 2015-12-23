@@ -27,6 +27,7 @@ $ pip install --upgrade falcon
 ```
 
 **注意事项**
+
 当你使用Cython时，你应该在升级Python之后重新编译一下Falcon。命令如下:
 
 ```
