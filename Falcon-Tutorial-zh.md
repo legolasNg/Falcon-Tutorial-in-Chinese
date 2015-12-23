@@ -60,7 +60,7 @@ Falcon框架包含大量的内联文档，你可以通过使用上面介绍的�
 
 **Tip**
 
-bpython是另一个非常给力的REPL(交互式解释器)，可以加入我们的工具箱，以便以后浏览新的library(库)。
+*bpython是另一个非常给力的REPL(交互式解释器)，可以加入我们的工具箱，以便以后浏览新的library(库)。*
 
 ##3. 托管应用(Hosting Your App)
 
@@ -151,7 +151,7 @@ $ http GET localhost:8000/images
 
 **Tip**
 
-`duck-typing`:动态类型的一种风格。在这种风格中，一个对象有效的语义，不是由继承自特定的类或实现特定的接口，而是由当前方法和属性的集合决定。在duck typing中，关注的不是对象的类型本身，而是它是如何使用的。
+*`duck-typing`:动态类型的一种风格。在这种风格中，一个对象有效的语义，不是由继承自特定的类或实现特定的接口，而是由当前方法和属性的集合决定。在duck typing中，关注的不是对象的类型本身，而是它是如何使用的。*
 
 ##5. 请求对象和响应对象(Request and Response Objects)
 
@@ -168,7 +168,7 @@ In [2]: help(falcon.Request)
 In [3]: help(falcon.Response)
 ```
 
-让我们探究一下他们如何运作。当客户端(client)**POSTs**到images集合(collection)时，我们要创建一个新的image资源。首先，我们需要指定images保存在什么地方(对于真实的service，你将需要使用一个对象储存服务，例如Cloud Files 或者Amazon S3)。
+让我们探究一下他们如何运作。当客户端(client)**POST**到images集合(collection)时，我们要创建一个新的image资源。首先，我们需要指定images保存在什么地方(对于真实的service，你将需要使用一个对象储存服务，例如Cloud Files 或者Amazon S3)。
 
 编辑你的`images.py`文件，添加下列代码到resource:
 
@@ -312,7 +312,7 @@ class Item(object):
 
 **Tips**
 
-如果你事先不知道数据流的大小，你可以通过使用分块编码，这个用法超过该教程范围。
+*如果你事先不知道数据流的大小，你可以通过使用分块编码，这个用法超过该教程范围。*
 
 如果`resp.status`没有明确地设定，其默认值为`200 OK`，确切的说，这应该是我们应该在`on_get`响应器去做的。
 
@@ -339,7 +339,7 @@ api.add_route('/images/(name)', image)
 
 **Tips**
 
-Falcon还支持更加复杂的参数化路径段(包含多个值)。例如，类Grasshopper(GH-like,可以通过参数的调整直接改变模型形态)的API能够使用下面的模板为两个分支添加一个路由。
+*Falcon还支持更加复杂的参数化路径段(包含多个值)。例如，类Grasshopper(GH-like,可以通过参数的调整直接改变模型形态)的API能够使用下面的模板为两个分支添加一个路由。*
 
 ```
 /repo/{org}/{repo}/compare/{usr0}:{branch0}...{usr1}:{branch1}
@@ -432,7 +432,7 @@ $ http POST localhost:8000/images Content-Type:image/jpx < test.jpx
 
 **Tip**
 
-可以关注一下我们的姊妹项目--[Talcons][4]，由社区贡献的一些游泳的Falcon钩子。如果你创建了一些有趣的钩子，同时你认为别人也需要，可以考虑贡献到该项目。
+*可以关注一下我们的姊妹项目--[Talcons][4]，由社区贡献的一些游泳的Falcon钩子。如果你创建了一些有趣的钩子，同时你认为别人也需要，可以考虑贡献到该项目。*
 
 ##8. 错误处理(Error Handling)
 
@@ -446,7 +446,7 @@ $ http POST localhost:8000/images Content-Type:image/jpx < test.jpx
 
 **Tip**
 
-除非已经注册自定义处理这种情况的程序,不要继承`falcon.HTTPError`，否则Falcon将会重新抛出错误。(详情请见：[falcon.API][5])
+*除非已经注册自定义处理这种情况的程序,不要继承`falcon.HTTPError`，否则Falcon将会重新抛出错误。(详情请见：[falcon.API][5])*
 
 谈到错误处理，当发生一些可怕的(轻度的)错误，我们可以手动设置错误状态、合适的响应header、甚至是一个使用`resp`对象的错误body。然而，Falcon通过提供一套在错误发生时可能抛出的异常，使得处理更加容易。事实上，如果Falcon捕获到(catch)继承自`falcon.HTTPError`的响应器(responder)抛出的任何异常，框架会将异常转换成对应的HTTP错误响应。
 
