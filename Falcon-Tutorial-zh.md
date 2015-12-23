@@ -1,7 +1,7 @@
 ﻿# Falcon教程
 [Falcon Tutorial(英文链接)][1]
 
-标签： `REST` `Falcon` `Python`
+标签： REST Falcon Python
 
 ---
 
@@ -30,7 +30,9 @@ import falcon
 api = application = falcon.API()
 ```
 
-这样就创建了一个WSGI应用，并且设置别名为`api`。我们可以使用任何变量名，Gunicorn希望我们默认使用`application`。WSGI应用只是一个具有明确定义的签名，你可以在任何支持WSGI协议的web server上托管你的应用。下面我们来看falcon.API类。 
+这样就创建了一个WSGI应用，并且设置别名为`api`。我们可以使用任何变量名，Gunicorn希望我们默认使用`application`。
+
+WSGI应用只是一个可调用的明确定义的签名，你可以在任何支持[WSGI协议][2]的web server上托管你的应用。下面我们来看falcon.API类。 
 
 首先安装IPython，并且启动它:
 
@@ -107,7 +109,7 @@ class Resource(object):
 上面的image资源定义了单一方法`on_get`。对于resource想要支持的任何HTTP方法，只需要简单在resource上加`on_x`类方法(class method)，`x`可以是标准HTTP方法中的任何一个，例如`on_get`,`on_put`,`on_head`(小写)等等。
 我们将这些著名的方法称作`responders`(响应器)。每个`responder`至少需要两个参数，一个代表HTTP请求，另一个代表对应请求的HTTP响应。根据习惯，我们一般写作`req`和`resp`。route(路由)模板和hooks(钩子)可以添加一些额外的参数，在后面将会讲到。
 
-现在，image资源对**GET**请求作出响应：`200 ok`和一个`JSON`对象。Falcon默认是`application/json`作为互联网媒体类型，但是你可以设置成任何你想使用的类型。例如，你可以使用[MessagePack][2]或者其他序列化格式。
+现在，image资源对**GET**请求作出响应：`200 ok`和一个`JSON`对象。Falcon默认是`application/json`作为互联网媒体类型，但是你可以设置成任何你想使用的类型。例如，你可以使用[MessagePack][3]或者其他序列化格式。
 如果你想在上面的例子中使用`MessagePack`，你需要为Python安装序列化/反序列化。通过运行`pip install msgpack-python`，然后更新你的responder中相应的响应数据(response data)和内容类型(content_type):
 
 ```python
@@ -430,7 +432,7 @@ $ http POST localhost:8000/images Content-Type:image/jpx < test.jpx
 
 **Tip**
 
-可以关注一下我们的姊妹项目--[Talcons][3]，由社区贡献的一些游泳的Falcon钩子。如果你创建了一些有趣的钩子，同时你认为别人也需要，可以考虑贡献到该项目。
+可以关注一下我们的姊妹项目--[Talcons][4]，由社区贡献的一些游泳的Falcon钩子。如果你创建了一些有趣的钩子，同时你认为别人也需要，可以考虑贡献到该项目。
 
 ##8. 错误处理(Error Handling)
 
@@ -444,7 +446,7 @@ $ http POST localhost:8000/images Content-Type:image/jpx < test.jpx
 
 **Tip**
 
-除非已经注册自定义处理这种情况的程序,不要继承`falcon.HTTPError`，否则Falcon将会重新抛出错误。(详情请见：[falcon.API][4])
+除非已经注册自定义处理这种情况的程序,不要继承`falcon.HTTPError`，否则Falcon将会重新抛出错误。(详情请见：[falcon.API][5])
 
 谈到错误处理，当发生一些可怕的(轻度的)错误，我们可以手动设置错误状态、合适的响应header、甚至是一个使用`resp`对象的错误body。然而，Falcon通过提供一套在错误发生时可能抛出的异常，使得处理更加容易。事实上，如果Falcon捕获到(catch)继承自`falcon.HTTPError`的响应器(responder)抛出的任何异常，框架会将异常转换成对应的HTTP错误响应。
 
@@ -508,14 +510,16 @@ In [7]: help(falcon.API.add_error_handler)
 
 我们友好的社区可以回答你的问题，帮助你解决棘手的问题。
 
-参照:[获取帮助][5]
+参照:[获取帮助][6]
 
 之前有提到，Falcon的文档覆盖面是相当广的。所以通过Python交互式解释器(REPL,例如IPython、bpython)查阅Falcon的模块，你可以学到很多。
 
-同时，千万不要吝啬将在Github上的Falcon源代码pull下来，然后在你心爱的编辑器中浏览。开发团队已经尽可能将代码写的简洁明了、高可读性;文档可能会有些问题，但是代码基本上不会出错的。
+同时，千万不要吝啬将Github上的Falcon源代码pull下来，并用你喜欢的编辑器去查看Falcon代码。开发团队已经尽可能将代码写的简洁明了、高可读性;文档可能会有些不足，但是代码基本上不会出错的。
+
 
   [1]: http://falcon.readthedocs.org/en/stable/user/tutorial.html
-  [2]: http://msgpack.org/
-  [3]: https://github.com/talons/talons
-  [4]: http://falcon.readthedocs.org/en/stable/api/api.html#api
-  [5]: http://falcon.readthedocs.org/en/stable/community/help.html#help
+  [2]: http://legacy.python.org/dev/peps/pep-3333/
+  [3]: http://msgpack.org/
+  [4]: https://github.com/talons/talons
+  [5]: http://falcon.readthedocs.org/en/stable/api/api.html#api
+  [6]: http://falcon.readthedocs.org/en/stable/community/help.html#help
