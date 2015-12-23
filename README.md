@@ -1,9 +1,9 @@
 ---
 ##Falcon-Tutorial-in-Chinese
 
-中文版Falcon官方教程《Falcon Tutorial》([英文原版][1],Falcon版本：0.3.0stable)。
+Falcon官方教程《Falcon Tutorial》中文版([英文原版][1],Falcon版本:0.3.0_stable)。
 
-后续会将官方文档《Classes and Functions》([英文原版][2])也进行翻译。
+官方文档《Classes and Functions》中文版([英文原版][2]，Falcon版本:0.3.0_stable)，未完待续。
 
 这是个人业余时间的一个尝试，如果有什么问题，欢迎指正。
 
