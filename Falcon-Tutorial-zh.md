@@ -303,7 +303,7 @@ class Item(object):
         resp.content_type = _ext_to_media_type(ext)
         
         image_path = os.path.join(self.storage_path, name)
-        resp.st以一个空行开始，以一个空行结束，中间的就是一个段落。ream = open(image_path, 'rb')
+        resp.stream = open(image_path, 'rb')
         resp.stream_len = os.path.getsize(image_path)
 ```
 
