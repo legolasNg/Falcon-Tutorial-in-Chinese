@@ -1,0 +1,38 @@
+预排序遍历树算法
+modified preorder tree（也叫Nested Sets）
+优缺点
+    优点：在消除了递归操作的前提下实现了无限分组，而且查询条件是基于整形数字的比较，效率很高。
+    缺点：节点的添加、删除及修改代价较大，将会涉及到表中多方面数据的改动。
+
+数据结构
+{
+name;
+parent;
+left;
+right;
+}
+
+
+表结构
++---------+---------+-------+-------+
+| title   | parent  |left   |right  |
++---------+---------+-------+-------+
+| food    |         |   1   |   18  |
+| fruit   | food    |   2   |   11  |
+| red     | fruit   |   3   |   6   |
+| cherry  | red     |   4   |   5   |
+| yellow  | fruit   |   7   |   10  |
+| banana  | yellow  |   8   |   9   |
+| meat    | food    |   12  |   17  |
+| beef    | meat    |   13  |   14  |
+| pork    | meat    |   15  |   16  |
++---------+---------+-------+-------+
+数据操作
+    1、总节点数
+        根据根节点的数据
+        节点数=（right_num-left_num+1）/2
+    2、两点之间路径
+        查看两点之间的路径
+        left1_num<left<left2_number
+        right2_num<right<right1_number
+    3、

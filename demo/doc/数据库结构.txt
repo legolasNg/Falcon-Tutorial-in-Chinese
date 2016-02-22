@@ -1,0 +1,38 @@
+company表--记录公司信息
+_id：
+company_name：
+contact：
+information：
+
+department表--记录部门结构    //采用改进的预排序遍历
+_id:
+department_name:
+parent:
+left:
+right:
+company_id:
+
+user表--记录个人信息
+_id:
+user_name:
+department_id:    //如果所属公司或部门已经认证，则值为department的id;若不是则填入公司部门的字符串
+phone:
+address:
+
+group表--记录用户的联系人分组信息
+_id:
+user_id:
+group_name:
+
+relation表--用户保存的客户
+_id:
+group_id:
+partner_id:       //如果添加的联系人已经注册，则值为user的id;若不是则填不填
+comments:
+tags:
+
+auth表--记录登录用户的信息
+_id:
+log_name:
+password:
+user_id:
