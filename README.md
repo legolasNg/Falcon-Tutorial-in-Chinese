@@ -7,8 +7,6 @@ Falcon官方教程《Falcon Tutorial》中文版([英文原版][1],Falcon版本:
 
 这是个人业余时间的一个尝试，如果有什么问题，欢迎指正。
 
-<wujianye3@163.com>
-
 ---
 ## Falcon安装
 
